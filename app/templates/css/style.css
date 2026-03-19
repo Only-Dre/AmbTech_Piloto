@@ -1,0 +1,266 @@
+/* ===================== RESET BÁSICO ===================== */
+* {
+  box-sizing: border-box;
+  /* Faz padding e border serem incluídos no tamanho total do elemento */
+  margin: 0;
+  /* Remove margens padrão do navegador de todos os elementos */
+  padding: 0;
+  /* Remove espaçamentos internos padrão do navegador de todos os elementos */
+}
+
+/* ===================== CORPO DA PÁGINA ===================== */
+body {
+  font-family: Arial, sans-serif;
+  /* Define a fonte principal da página */
+  background-color: #f0f2f5;
+  /* Cor de fundo cinza claro para toda a página */
+  color: #333;
+  /* Cor padrão do texto: cinza escuro */
+  min-height: 100vh;
+  /* Garante que o body ocupe pelo menos a altura total da tela */
+}
+
+/* ===================== CABEÇALHO ===================== */
+header {
+  background-color: #1a73e8;
+  /* Fundo azul para o cabeçalho do sistema */
+  color: white;
+  /* Texto branco para contraste com o fundo azul */
+  padding: 1rem 2rem;
+  /* Espaçamento interno: 1rem em cima/baixo, 2rem nas laterais */
+  display: flex;
+  /* Usa flexbox para alinhar os itens do cabeçalho */
+  align-items: center;
+  /* Alinha verticalmente o conteúdo ao centro */
+  gap: 1rem;
+  /* Espaço entre os elementos filhos do cabeçalho */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  /* Sombra suave abaixo do cabeçalho para dar profundidade */
+}
+
+header h1 {
+  font-size: 1.4rem;
+  /* Tamanho do título principal do cabeçalho */
+  font-weight: bold;
+  /* Negrito no título */
+}
+
+header p {
+  font-size: 0.9rem;
+  /* Texto menor para o subtítulo */
+  opacity: 0.85;
+  /* Leve transparência para diferenciar do título */
+}
+
+/* ===================== CONTEÚDO PRINCIPAL ===================== */
+main {
+  max-width: 960px;
+  /* Largura máxima do conteúdo: evita que fique muito largo em telas grandes */
+  margin: 2rem auto;
+  /* Centraliza o conteúdo horizontalmente com margem no topo e fundo */
+  padding: 0 1rem;
+  /* Espaçamento lateral para telas menores */
+}
+
+/* ===================== SEÇÃO DE CARDS ===================== */
+.cards {
+  display: grid;
+  /* Usa CSS Grid para organizar os cartões */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  /* Cria colunas responsivas: mínimo 180px, máximo 1 fração do espaço */
+  gap: 1rem;
+  /* Espaço entre os cartões */
+  margin-bottom: 1.5rem;
+  /* Margem abaixo da seção de cards */
+}
+
+.card {
+  background-color: white;
+  /* Fundo branco para cada cartão */
+  border-radius: 10px;
+  /* Bordas arredondadas nos cartões */
+  padding: 1.2rem 1.5rem;
+  /* Espaçamento interno do cartão */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Sombra leve para destacar o cartão do fundo */
+  border-left: 4px solid #1a73e8;
+  /* Borda esquerda azul como detalhe visual */
+}
+
+.card .label {
+  font-size: 0.8rem;
+  /* Texto pequeno para o rótulo do cartão */
+  color: #888;
+  /* Cor cinza para o rótulo, menos destaque que o valor */
+  text-transform: uppercase;
+  /* Transforma o texto em maiúsculas */
+  letter-spacing: 0.05em;
+  /* Pequeno espaçamento entre letras para melhor leitura */
+  margin-bottom: 0.5rem;
+  /* Espaço entre o rótulo e o valor */
+}
+
+.card .valor {
+  font-size: 2rem;
+  /* Tamanho grande para o valor principal do cartão */
+  font-weight: bold;
+  /* Negrito no valor */
+  color: #333;
+  /* Cor padrão do valor */
+}
+
+.card .valor.temp {
+  color: #e84040;
+  /* Cor vermelha para valores de temperatura */
+}
+
+.card .valor.umid {
+  color: #1a9e6e;
+  /* Cor verde para valores de umidade */
+}
+
+/* ===================== SEÇÃO DE BOTÕES ===================== */
+.acoes {
+  display: flex;
+  /* Alinha os botões em linha */
+  gap: 1rem;
+  /* Espaço entre os botões */
+  margin-bottom: 1.5rem;
+  /* Margem abaixo da seção de botões */
+  flex-wrap: wrap;
+  /* Permite que os botões quebrem para outra linha em telas pequenas */
+}
+
+.acoes button {
+  padding: 0.6rem 1.4rem;
+  /* Espaçamento interno dos botões */
+  font-size: 0.95rem;
+  /* Tamanho do texto dos botões */
+  border: none;
+  /* Remove borda padrão */
+  border-radius: 6px;
+  /* Bordas arredondadas nos botões */
+  cursor: pointer;
+  /* Cursor de mãozinha ao passar o mouse */
+  transition: background-color 0.2s ease;
+  /* Animação suave na troca de cor ao hover */
+}
+
+.acoes form button {
+  background-color: #1a73e8;
+  /* Botão de envio: fundo azul */
+  color: white;
+  /* Texto branco no botão de envio */
+}
+
+.acoes form button:hover {
+  background-color: #1558b0;
+  /* Azul mais escuro ao passar o mouse */
+}
+
+.acoes a {
+  text-decoration: none;
+  /* Remove sublinhado do link que envolve o botão */
+}
+
+.acoes a button {
+  background-color: white;
+  /* Botão de atualizar: fundo branco */
+  color: #1a73e8;
+  /* Texto azul */
+  border: 1px solid #1a73e8;
+  /* Borda azul para diferenciar do botão principal */
+}
+
+.acoes a button:hover {
+  background-color: #e8f0fe;
+  /* Fundo azul muito claro ao passar o mouse */
+}
+
+/* ===================== SEÇÃO DA TABELA ===================== */
+.tabela-section {
+  background-color: white;
+  /* Fundo branco para a seção da tabela */
+  border-radius: 10px;
+  /* Bordas arredondadas */
+  padding: 1.5rem;
+  /* Espaçamento interno */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Sombra leve igual aos cards */
+  margin-bottom: 2rem;
+  /* Margem abaixo da tabela */
+}
+
+.tabela-section h2 {
+  font-size: 1rem;
+  /* Tamanho do título da tabela */
+  color: #555;
+  /* Cor cinza médio para o título */
+  margin-bottom: 1rem;
+  /* Espaço entre o título e a tabela */
+  font-weight: 600;
+  /* Semi-negrito no título */
+}
+
+/* ===================== TABELA ===================== */
+table {
+  width: 100%;
+  /* Tabela ocupa toda a largura disponível */
+  border-collapse: collapse;
+  /* Remove o espaço duplo entre bordas das células */
+  font-size: 0.9rem;
+  /* Tamanho do texto dentro da tabela */
+}
+
+thead tr {
+  border-bottom: 2px solid #e0e0e0;
+  /* Linha mais grossa abaixo do cabeçalho da tabela */
+}
+
+th {
+  text-align: left;
+  /* Alinha o texto dos cabeçalhos à esquerda */
+  padding: 10px 14px;
+  /* Espaçamento interno das células de cabeçalho */
+  font-size: 0.78rem;
+  /* Texto menor nos cabeçalhos */
+  color: #888;
+  /* Cor cinza para os títulos das colunas */
+  text-transform: uppercase;
+  /* Títulos das colunas em maiúsculas */
+  letter-spacing: 0.05em;
+  /* Espaçamento entre letras nos títulos */
+}
+
+td {
+  padding: 12px 14px;
+  /* Espaçamento interno das células de dados */
+  border-bottom: 1px solid #f0f0f0;
+  /* Linha fina entre as linhas da tabela */
+  color: #444;
+  /* Cor do texto das células */
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+  /* Remove a borda da última linha da tabela */
+}
+
+tbody tr:hover td {
+  background-color: #f5f9ff;
+  /* Fundo azul muito claro ao passar o mouse na linha */
+}
+
+/* ===================== RODAPÉ ===================== */
+footer {
+  text-align: center;
+  /* Centraliza o texto do rodapé */
+  padding: 1.5rem;
+  /* Espaçamento interno do rodapé */
+  font-size: 0.8rem;
+  /* Texto pequeno no rodapé */
+  color: #aaa;
+  /* Cor cinza claro para o texto do rodapé */
+  border-top: 1px solid #e0e0e0;
+  /* Linha fina acima do rodapé */
+}
