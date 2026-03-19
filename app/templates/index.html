@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <title>AmbTech - Monitoramento Ambiental</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+
+  <header>
+  <!-- Cabeçalho visual do sistema -->
+    <h1>AmbTech — Monitoramento Ambiental</h1>
+    <!-- Título principal -->
+    <p>Sistema conectado ao ThingSpeak</p>
+    <!-- Subtítulo informativo -->
+  </header>
+
+  <main>
+  <!-- Conteúdo principal da página -->
+
+    <!-- ===================== CARDS DE RESUMO ===================== -->
+    <section class="cards">
+    <!-- Seção dos cartões com os valores mais recentes -->
+
+      <div class="card">
+      <!-- Cartão de temperatura -->
+        <p class="label">Última temperatura</p>
+        <!-- Rótulo do cartão -->
+        <p class="valor temp" id="ultima-temp">--</p>
+      </div>
+
+      <div class="card">
+      <!-- Cartão de umidade -->
+        <p class="label">Última umidade</p>
+        <!-- Rótulo do cartão -->
+        <p class="valor umid" id="ultima-umid">--</p>
+      </div>
+
+      <div class="card">
+      <!-- Cartão de total de registros -->
+        <p class="label">Registros lidos</p>
+        <!-- Rótulo do cartão -->
+        <p class="valor" id="total-registros">--</p>
+      </div>
+
+    </section>
+    <!-- Fim dos cards -->
+
+    <!-- ===================== BOTÕES DE AÇÃO ===================== -->
+    <section class="acoes">
+    <!-- Seção com os botões de interação -->
+
+      <button onclick="enviarDados()">Enviar dados simulados</button>
+      <button onclick="carregarDados()">Atualizar leitura</button>
+
+    </section>
+    <!-- Fim dos botões -->
+
+    <!-- ===================== MENSAGEM DE STATUS ===================== -->
+    <p id="status-msg" style="margin-bottom: 1rem; color: green; font-size: 0.9rem;"></p>
+
+    <!-- ===================== TABELA DE REGISTROS ===================== -->
+    <section class="tabela-section">
+    <!-- Seção que contém a tabela de histórico -->
+
+      <h2 id="titulo-tabela">Registros do ThingSpeak</h2>
+
+      <table>
+      <!-- Tabela HTML de dados -->
+
+        <thead>
+        <!-- Cabeçalho fixo da tabela -->
+          <tr>
+          <!-- Linha de cabeçalho -->
+            <th>#</th>
+            <!-- Coluna de índice -->
+            <th>Data / Hora</th>
+            <!-- Coluna de timestamp -->
+            <th>Temperatura (°C)</th>
+            <!-- Coluna de temperatura -->
+            <th>Umidade (%)</th>
+            <!-- Coluna de umidade -->
+          </tr>
+        </thead>
+        <!-- Fim do cabeçalho -->
+
+        <tbody id="corpo-tabela">
+        <!-- Corpo da tabela: preenchido dinamicamente pelo JavaScript -->
+        <!-- O id="corpo-tabela" permite que o JS encontre e preencha esse elemento -->
+        </tbody>
+        <!-- Fim do corpo da tabela -->
+
+      </table>
+      <!-- Fim da tabela -->
+
+    </section>
+    <!-- Fim da seção da tabela -->
+
+  </main>
+  <!-- Fim do conteúdo principal -->
+
+  <footer>
+  <!-- Rodapé da página -->
+    <p>AmbTech Soluções Inteligentes · Dados via ThingSpeak · Armazenamento MySQL</p>
+    <!-- Texto informativo sobre tecnologias usadas -->
+  </footer>
+
+  <!-- ===================== JAVASCRIPT ===================== -->
+  <script>
+  /* Bloco de script colocado no final do body para garantir que o HTML
+     já esteja carregado antes do JavaScript ser executado */
+
+    async function carregarDados() {
+      /* Função assíncrona que busca os dados do backend Flask via fetch */
+
+      try {
+        /* Tenta executar o bloco abaixo; se falhar, cai no catch */
+
+        const resposta = await fetch('/dados');
+        /* Faz uma requisição GET para a rota /dados do Flask
+           await pausa a função até a resposta chegar */
+
+        const json = await resposta.json();
+        /* Converte a resposta HTTP em objeto JavaScript (JSON)
+           await pausa até a conversão terminar */
+
+        const feeds = json.feeds;
+        /* Acessa o array "feeds" dentro do JSON do ThingSpeak
+           Exemplo de estrutura: { "channel": {...}, "feeds": [ {...}, {...} ] } */
+
+        if (!feeds || feeds.length === 0) {
+          /* Verifica se o array de feeds existe e tem pelo menos um item */
+          document.getElementById('status-msg').textContent = 'Nenhum dado encontrado.';
+          /* Exibe mensagem de aviso no parágrafo de status */
+          return;
+          /* Encerra a função sem continuar */
+        }
+
+        const ultimo = feeds[feeds.length - 1];
+        /* Pega o último elemento do array, que é o registro mais recente */
+
+        document.getElementById('ultima-temp').textContent = ultimo.field1 + ' °C';
+        /* Preenche o card de temperatura com o valor de field1 do JSON
+           field1 é o campo de temperatura configurado no ThingSpeak */
+
+        document.getElementById('ultima-umid').textContent = ultimo.field2 + ' %';
+        /* Preenche o card de umidade com o valor de field2 do JSON
+           field2 é o campo de umidade configurado no ThingSpeak */
+
+        document.getElementById('total-registros').textContent = feeds.length;
+        /* Exibe a quantidade total de registros recebidos */
+
+        document.getElementById('titulo-tabela').textContent =
+          'Registros do ThingSpeak (últimos ' + feeds.length + ')';
+        /* Atualiza o título da tabela com a quantidade real de registros */
+
+        const tbody = document.getElementById('corpo-tabela');
+        /* Seleciona o elemento tbody pelo id para inserir as linhas */
+
+        tbody.innerHTML = '';
+        /* Limpa o conteúdo anterior da tabela antes de inserir novos dados
+           Evita duplicar linhas ao atualizar */
+
+        feeds.forEach(function(registro, indice) {
+          /* Percorre cada item do array feeds
+             registro = objeto com os dados daquele item
+             indice   = posição atual no array (começa em 0) */
+
+          const linha = document.createElement('tr');
+          /* Cria um elemento <tr> (linha de tabela) dinamicamente */
+
+          linha.innerHTML =
+            '<td>' + (indice + 1) + '</td>' +
+            /* Número da linha: indice começa em 0, então soma 1 */
+
+            '<td>' + registro.created_at + '</td>' +
+            /* Data e hora do registro, vinda do campo created_at do JSON ThingSpeak */
+
+            '<td>' + registro.field1 + '</td>' +
+            /* Temperatura, vinda do campo field1 do JSON */
+
+            '<td>' + registro.field2 + '</td>';
+            /* Umidade, vinda do campo field2 do JSON */
+
+          tbody.appendChild(linha);
+          /* Adiciona a linha criada dentro do tbody da tabela */
+
+        });
+        /* Fim do forEach */
+
+        document.getElementById('status-msg').textContent = 'Dados atualizados com sucesso.';
+        /* Exibe mensagem de sucesso no parágrafo de status */
+
+      } catch (erro) {
+        /* Captura qualquer erro que ocorreu dentro do try */
+        document.getElementById('status-msg').style.color = 'red';
+        /* Muda a cor da mensagem de status para vermelho */
+        document.getElementById('status-msg').textContent = 'Erro ao carregar dados: ' + erro.message;
+        /* Exibe a mensagem de erro no parágrafo de status */
+      }
+
+    }
+    /* Fim da função carregarDados */
+
+    async function enviarDados() {
+      /* Função assíncrona que envia dados simulados ao backend Flask */
+
+      try {
+        /* Tenta executar o envio */
+
+        const resposta = await fetch('/enviar', { method: 'POST' });
+        /* Faz uma requisição POST para a rota /enviar do Flask
+           POST indica que estamos enviando uma ação, não apenas lendo */
+
+        const json = await resposta.json();
+        /* Converte a resposta do Flask em objeto JavaScript */
+
+        document.getElementById('status-msg').style.color = 'green';
+        /* Garante que a cor da mensagem está verde para sucesso */
+
+        document.getElementById('status-msg').textContent = json.mensagem || 'Dados enviados!';
+        /* Exibe a mensagem retornada pelo Flask, ou texto padrão se não houver */
+
+        carregarDados();
+        /* Após enviar, chama carregarDados() para atualizar a tabela automaticamente */
+
+      } catch (erro) {
+        /* Captura erros no envio */
+        document.getElementById('status-msg').style.color = 'red';
+        /* Muda a cor para vermelho em caso de erro */
+        document.getElementById('status-msg').textContent = 'Erro ao enviar: ' + erro.message;
+        /* Exibe o erro no parágrafo de status */
+      }
+
+    }
+    /* Fim da função enviarDados */
+
+    carregarDados();
+    /* Chama carregarDados() automaticamente quando a página termina de carregar
+       Assim o dashboard já começa preenchido sem o usuário precisar clicar */
+
+  </script>
+  <!-- Fim do bloco JavaScript -->
+
+</body>
+<!-- Fim do corpo da página -->
+
+</html>
+<!-- Fecha o documento HTML -->
