@@ -1,252 +1,158 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>AmbTech - Monitoramento Ambiental</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitor de Sensores</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="static/css/style.css" />
 </head>
-
 <body>
 
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+      <span>MonitorHub</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('listar_status') }}" class="nav-item nav-item--active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="{{ url_for('adicionar_status') }}" class="nav-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Novo dado
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="pulse-dot"></span>
+      <span>Sistema ativo</span>
+    </div>
+  </aside>
 
-  <header>
-  <!-- Cabeçalho visual do sistema -->
-    <h1>AmbTech — Monitoramento Ambiental</h1>
-    <!-- Título principal -->
-    <p>Sistema conectado ao ThingSpeak</p>
-    <!-- Subtítulo informativo -->
-  </header>
 
-  <main>
-  <!-- Conteúdo principal da página -->
+  <div class="layout">
 
-    <!-- ===================== CARDS DE RESUMO ===================== -->
-    <section class="cards">
-    <!-- Seção dos cartões com os valores mais recentes -->
-
-      <div class="card">
-      <!-- Cartão de temperatura -->
-        <p class="label">Última temperatura</p>
-        <!-- Rótulo do cartão -->
-        <p class="valor temp" id="ultima-temp">--</p>
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Dashboard</h1>
+        <span class="page-sub">últimas 10 leituras por fonte</span>
       </div>
-
-      <div class="card">
-      <!-- Cartão de umidade -->
-        <p class="label">Última umidade</p>
-        <!-- Rótulo do cartão -->
-        <p class="valor umid" id="ultima-umid">--</p>
+      <div class="topbar-right">
+        <span class="refresh-label">próxima atualização em <strong id="countdown">15s</strong></span>
+        <a href="{{ url_for('adicionar_status') }}" class="btn-primary">+ Novo dado</a>
       </div>
+    </header>
 
-      <div class="card">
-      <!-- Cartão de total de registros -->
-        <p class="label">Registros lidos</p>
-        <!-- Rótulo do cartão -->
-        <p class="valor" id="total-registros">--</p>
+    <main class="main">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flashes">
+            {% for category, message in messages %}
+              <div class="flash flash--{{ category }}">
+                {{ '✓' if category == 'sucesso' else '!' }} {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% if status_banco %}
+      <div class="kpis">
+        <div class="kpi">
+          <span class="kpi-label">Última temperatura</span>
+          <span class="kpi-value kpi-temp">{{ status_banco[0].temperatura }}<em>°C</em></span>
+          <span class="kpi-src">{{ status_banco[0].origem_dado }}</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-label">Última umidade</span>
+          <span class="kpi-value kpi-hum">{{ status_banco[0].umidade }}<em>%</em></span>
+          <span class="kpi-src">banco de dados</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-label">Registros no banco</span>
+          <span class="kpi-value">{{ status_banco | length }}</span>
+          <span class="kpi-src">exibidos agora</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-label">Registros ThingSpeak</span>
+          <span class="kpi-value">{{ status_thingspeak | length }}</span>
+          <span class="kpi-src">exibidos agora</span>
+        </div>
       </div>
+      {% endif %}
 
-    </section>
-    <!-- Fim dos cards -->
+      <div class="tables-row">
 
-    <!-- ===================== BOTÕES DE AÇÃO ===================== -->
-    <section class="acoes">
-    <!-- Seção com os botões de interação -->
+        <section class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+              Banco de dados
+            </span>
+            <span class="card-badge">MySQL</span>
+          </div>
+          {% if status_banco %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Data / Hora</th><th>Temp.</th><th>Umidade</th><th>Origem</th></tr>
+              </thead>
+              <tbody>
+                {% for s in status_banco %}
+                <tr {% if loop.first %}class="row-new"{% endif %}>
+                  <td class="td-muted">{{ s.id }}</td>
+                  <td class="td-mono">{{ s.data_hora }}</td>
+                  <td class="td-temp">{{ s.temperatura }}°C</td>
+                  <td class="td-hum">{{ s.umidade }}%</td>
+                  <td><span class="chip">{{ s.origem_dado }}</span></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty">Nenhum dado encontrado no banco.</div>
+          {% endif %}
+        </section>
 
-      <button onclick="enviarDados()">Enviar dados simulados</button>
-      <button onclick="carregarDados()">Atualizar leitura</button>
+        <section class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6c0 0 5-2 11-2s11 2 11 2"/><path d="M5 10c0 0 3-1.5 7-1.5S19 10 19 10"/><path d="M8.5 14c0 0 1.5-1 3.5-1s3.5 1 3.5 1"/><circle cx="12" cy="18" r="1.5" fill="currentColor"/></svg>
+              ThingSpeak
+            </span>
+            <span class="card-badge card-badge--live">● ao vivo</span>
+          </div>
+          {% if status_thingspeak %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Recebido em</th><th>Temp.</th><th>Umidade</th></tr>
+              </thead>
+              <tbody>
+                {% for s in status_thingspeak %}
+                <tr {% if loop.first %}class="row-new"{% endif %}>
+                  <td class="td-muted">{{ loop.index }}</td>
+                  <td class="td-mono">{{ s.created_at }}</td>
+                  <td class="td-temp">{{ s.temperatura }}°C</td>
+                  <td class="td-hum">{{ s.umidade }}%</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty">Nenhum dado recebido do ThingSpeak.</div>
+          {% endif %}
+        </section>
 
-    </section>
-    <!-- Fim dos botões -->
+      </div>
+    </main>
+  </div>
 
-    <!-- ===================== MENSAGEM DE STATUS ===================== -->
-    <p id="status-msg" style="margin-bottom: 1rem; color: green; font-size: 0.9rem;"></p>
-
-    <!-- ===================== TABELA DE REGISTROS ===================== -->
-    <section class="tabela-section">
-    <!-- Seção que contém a tabela de histórico -->
-
-      <h2 id="titulo-tabela">Registros do ThingSpeak</h2>
-
-      <table>
-      <!-- Tabela HTML de dados -->
-
-        <thead>
-        <!-- Cabeçalho fixo da tabela -->
-          <tr>
-          <!-- Linha de cabeçalho -->
-            <th>#</th>
-            <!-- Coluna de índice -->
-            <th>Data / Hora</th>
-            <!-- Coluna de timestamp -->
-            <th>Temperatura (°C)</th>
-            <!-- Coluna de temperatura -->
-            <th>Umidade (%)</th>
-            <!-- Coluna de umidade -->
-          </tr>
-        </thead>
-        <!-- Fim do cabeçalho -->
-
-        <tbody id="corpo-tabela">
-        <!-- Corpo da tabela: preenchido dinamicamente pelo JavaScript -->
-        <!-- O id="corpo-tabela" permite que o JS encontre e preencha esse elemento -->
-        </tbody>
-        <!-- Fim do corpo da tabela -->
-
-      </table>
-      <!-- Fim da tabela -->
-
-    </section>
-    <!-- Fim da seção da tabela -->
-
-  </main>
-  <!-- Fim do conteúdo principal -->
-
-  <footer>
-  <!-- Rodapé da página -->
-    <p>AmbTech Soluções Inteligentes · Dados via ThingSpeak · Armazenamento MySQL</p>
-    <!-- Texto informativo sobre tecnologias usadas -->
-  </footer>
-
-  <!-- ===================== JAVASCRIPT ===================== -->
-  <script>
-  /* Bloco de script colocado no final do body para garantir que o HTML
-     já esteja carregado antes do JavaScript ser executado */
-
-    async function carregarDados() {
-      /* Função assíncrona que busca os dados do backend Flask via fetch */
-
-      try {
-        /* Tenta executar o bloco abaixo; se falhar, cai no catch */
-
-        const resposta = await fetch('/dados');
-        /* Faz uma requisição GET para a rota /dados do Flask
-           await pausa a função até a resposta chegar */
-
-        const json = await resposta.json();
-        /* Converte a resposta HTTP em objeto JavaScript (JSON)
-           await pausa até a conversão terminar */
-
-        const feeds = json.feeds;
-        /* Acessa o array "feeds" dentro do JSON do ThingSpeak
-           Exemplo de estrutura: { "channel": {...}, "feeds": [ {...}, {...} ] } */
-
-        if (!feeds || feeds.length === 0) {
-          /* Verifica se o array de feeds existe e tem pelo menos um item */
-          document.getElementById('status-msg').textContent = 'Nenhum dado encontrado.';
-          /* Exibe mensagem de aviso no parágrafo de status */
-          return;
-          /* Encerra a função sem continuar */
-        }
-
-        const ultimo = feeds[feeds.length - 1];
-        /* Pega o último elemento do array, que é o registro mais recente */
-
-        document.getElementById('ultima-temp').textContent = ultimo.field1 + ' °C';
-        /* Preenche o card de temperatura com o valor de field1 do JSON
-           field1 é o campo de temperatura configurado no ThingSpeak */
-
-        document.getElementById('ultima-umid').textContent = ultimo.field2 + ' %';
-        /* Preenche o card de umidade com o valor de field2 do JSON
-           field2 é o campo de umidade configurado no ThingSpeak */
-
-        document.getElementById('total-registros').textContent = feeds.length;
-        /* Exibe a quantidade total de registros recebidos */
-
-        document.getElementById('titulo-tabela').textContent =
-          'Registros do ThingSpeak (últimos ' + feeds.length + ')';
-        /* Atualiza o título da tabela com a quantidade real de registros */
-
-        const tbody = document.getElementById('corpo-tabela');
-        /* Seleciona o elemento tbody pelo id para inserir as linhas */
-
-        tbody.innerHTML = '';
-        /* Limpa o conteúdo anterior da tabela antes de inserir novos dados
-           Evita duplicar linhas ao atualizar */
-
-        feeds.forEach(function(registro, indice) {
-          /* Percorre cada item do array feeds
-             registro = objeto com os dados daquele item
-             indice   = posição atual no array (começa em 0) */
-
-          const linha = document.createElement('tr');
-          /* Cria um elemento <tr> (linha de tabela) dinamicamente */
-
-          linha.innerHTML =
-            '<td>' + (indice + 1) + '</td>' +
-            /* Número da linha: indice começa em 0, então soma 1 */
-
-            '<td>' + registro.created_at + '</td>' +
-            /* Data e hora do registro, vinda do campo created_at do JSON ThingSpeak */
-
-            '<td>' + registro.field1 + '</td>' +
-            /* Temperatura, vinda do campo field1 do JSON */
-
-            '<td>' + registro.field2 + '</td>';
-            /* Umidade, vinda do campo field2 do JSON */
-
-          tbody.appendChild(linha);
-          /* Adiciona a linha criada dentro do tbody da tabela */
-
-        });
-        /* Fim do forEach */
-
-        document.getElementById('status-msg').textContent = 'Dados atualizados com sucesso.';
-        /* Exibe mensagem de sucesso no parágrafo de status */
-
-      } catch (erro) {
-        /* Captura qualquer erro que ocorreu dentro do try */
-        document.getElementById('status-msg').style.color = 'red';
-        /* Muda a cor da mensagem de status para vermelho */
-        document.getElementById('status-msg').textContent = 'Erro ao carregar dados: ' + erro.message;
-        /* Exibe a mensagem de erro no parágrafo de status */
-      }
-
-    }
-    /* Fim da função carregarDados */
-
-    async function enviarDados() {
-      /* Função assíncrona que envia dados simulados ao backend Flask */
-
-      try {
-        /* Tenta executar o envio */
-
-        const resposta = await fetch('/enviar', { method: 'POST' });
-        /* Faz uma requisição POST para a rota /enviar do Flask
-           POST indica que estamos enviando uma ação, não apenas lendo */
-
-        const json = await resposta.json();
-        /* Converte a resposta do Flask em objeto JavaScript */
-
-        document.getElementById('status-msg').style.color = 'green';
-        /* Garante que a cor da mensagem está verde para sucesso */
-
-        document.getElementById('status-msg').textContent = json.mensagem || 'Dados enviados!';
-        /* Exibe a mensagem retornada pelo Flask, ou texto padrão se não houver */
-
-        carregarDados();
-        /* Após enviar, chama carregarDados() para atualizar a tabela automaticamente */
-
-      } catch (erro) {
-        /* Captura erros no envio */
-        document.getElementById('status-msg').style.color = 'red';
-        /* Muda a cor para vermelho em caso de erro */
-        document.getElementById('status-msg').textContent = 'Erro ao enviar: ' + erro.message;
-        /* Exibe o erro no parágrafo de status */
-      }
-
-    }
-    /* Fim da função enviarDados */
-
-    carregarDados();
-    /* Chama carregarDados() automaticamente quando a página termina de carregar
-       Assim o dashboard já começa preenchido sem o usuário precisar clicar */
-
-  </script>
-  <!-- Fim do bloco JavaScript -->
-
+  <script src="static/js/main.js"></script>
 </body>
-<!-- Fim do corpo da página -->
-
 </html>
-<!-- Fecha o documento HTML -->

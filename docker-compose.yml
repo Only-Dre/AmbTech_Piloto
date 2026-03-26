@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
 
   mysql:
@@ -8,26 +10,21 @@ services:
     env_file:
       - .env
 
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-
     ports:
       - "3306:3306"
 
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./mysql/db:/docker-entrypoint-initdb.d
-    
+      - ./db:/docker-entrypoint-initdb.d
+
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 30
       start_period: 25s
-    
+
+
   app:
     build:
       context: ./app
@@ -36,28 +33,16 @@ services:
 
     env_file:
       - .env
-    
+
     depends_on:
       mysql:
         condition: service_healthy
-    
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
-      FLASK_DEBUG: ${FLASK_DEBUG}
-      API_WRITE_KEY: ${API_WRITE_KEY}
-      API_READ_KEY: ${API_READ_KEY}
-      CHANNEL_ID: ${CHANNEL_ID}
 
     ports:
       - "5000:5000"
 
     volumes:
-      - ./backend:/app
+      - ./app:/app
 
 volumes:
   mysql_data:

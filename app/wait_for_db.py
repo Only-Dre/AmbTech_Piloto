@@ -37,5 +37,6 @@ if __name__ == "__main__":
             print(f"[wait_for_db] MySQL ainda não disponível: {e}")
 
             time.sleep(intervalo)
+            
     print("[wait_for_db] Falha: MySQL não ficou disponível a tempo.")
     sys.exit(1)

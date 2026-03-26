@@ -1,4 +1,4 @@
-USE ambienteA;
+USE ambiente;
 
 CREATE TABLE IF NOT EXISTS status_ambiente (
 
